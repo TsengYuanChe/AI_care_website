@@ -1,0 +1,88 @@
+{% extends "crud/base.html" %}
+
+{% block content %}
+<style>
+    .original-image img,
+.marked-image img {
+    width: 500px; /* 固定寬度 */
+    height: auto; /* 固定高度 */
+    object-fit: cover; /* 確保圖片不失真，保持比例，填滿 */
+    border-radius: 5px; /* 可選：增加圓角 */
+}
+
+.results-container {
+    display: flex;
+    flex-wrap: wrap; /* 允許換行，當圖片太多時 */
+    justify-content: space-between; /* 在容器內部均勻分配空間 */
+}
+
+.result-item {
+    display: flex;
+    flex-direction: row; /* 水平排列 */
+    align-items: flex-start; /* 上對齊 */
+    margin-bottom: 20px; /* 每個項目的底部間距 */
+    width: 50%; /* 調整寬度 */
+}
+
+.original-image, .marked-image {
+    flex: 1; /* 等比縮放 */
+    padding: 10px; /* 內邊距 */
+}
+
+.result-details {
+    flex-grow: 1; /* 允許欄位增長以填充空間 */
+    flex-shrink: 0; /* 防止欄位縮小 */
+    padding: 10px; /* 內邊距 */
+    display: flex;
+    flex-direction: column; /* 垂直排列內容 */
+    min-width: 200px; /* 設置最小寬度 */
+    max-width: 300px; /* 設置最大寬度 */
+    overflow: hidden; /* 隱藏溢出內容 */
+    text-overflow: ellipsis; /* 使用省略號表示溢出內容 */
+    white-space: nowrap; /* 禁止換行 */
+}
+
+.suggestions {
+    flex-grow: 1; /* 允許該欄位增長以填充空間 */
+    padding: 10px; /* 內邊距 */
+    min-width: 200px; /* 設置最小寬度 */
+    max-width: 300px; /* 設置最大寬度 */
+    white-space: normal; /* 允許換行 */
+    overflow: visible; /* 確保顯示所有內容 */
+    word-wrap: break-word; /* 遇到單詞超出時換行 */
+    text-align: left; /* 將文本對齊設置為左對齊 */
+}
+</style>
+<h2>{{ user.username }} 的分析結果</h2>
+
+{% if results.items %}
+    <ul>
+    {% for result in results.items %}
+        <div class="result-item">
+            <div class="original-image">
+                <img src="{{ url_for('crud.static', filename=result.original_image_path) }}" alt="原始圖片">
+            </div>
+            <div class="marked-image">
+                <img src="{{ url_for('crud.static', filename=result.marked_image_path) }}" alt="標記後的圖片">
+            </div>
+            <div class="result-details">
+                <h2>圖片名稱: {{ result.original_filename }}</h2>
+                <p>位置: {{ result.location }}</p> <!-- 假設 location 是用戶上傳時的選項 -->
+                <p class='suggestions'>建議：{{ result.suggestions }}</p>
+            </div>
+        </div>
+    {% endfor %}
+    </ul>
+
+    <div>
+        {% if results.has_prev %}
+            <a href="{{ url_for('crud.results', username=user.username, page=results.prev_num) }}">上一頁</a>
+        {% endif %}
+        {% if results.has_next %}
+            <a href="{{ url_for('crud.results', username=user.username, page=results.next_num) }}">下一頁</a>
+        {% endif %}
+    </div>
+{% else %}
+    <p>尚未有任何結果。</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "crud/base.html" %}
+{% block content%}
+<style>
+    .image-container {
+        display: flex;
+        flex-wrap: wrap; /* 允許換行 */
+        justify-content: center; /* 水平置中 */
+    }
+    .image-container label {
+        margin: 10px; /* 圖片之間的間距 */
+    }
+    input[type="radio"] {
+        display: none; /* 隱藏原點 */
+    }
+    label img {
+        cursor: pointer; /* 當滑鼠懸停時顯示為可點擊 */
+        border: 2px solid transparent; /* 預設邊框 */
+        width: 100px; /* 圖片寬度 */
+        height: auto; /* 自動調整高度 */
+    }
+    label input[type="radio"]:checked + img {
+        border: 2px solid #007bff; /* 選中後的邊框顏色 */
+    }
+    .imgsize{
+        width: 300px;
+        height: auto;
+    }
+    .upload-button {
+        display: flex; /* 使用 flexbox 進行佈局 */
+        justify-content: center; /* 水平置中 */
+        align-items: center; /* 垂直置中（可選） */
+    }
+    .weeeeee{
+        font-size: 70px;
+        display: flex; /* 使用 flexbox 進行佈局 */
+        justify-content: center; /* 水平置中 */
+        align-items: center; /* 垂直置中（可選） */
+    }
+</style>
+<form method="POST" action="{{ url_for('crud.upload_image') }}" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    <div class='image-container'>
+        <label for="image1">
+            <input type="radio" id="image1" name="image_choice" value="livingroom">
+            <img src="{{ url_for('crud.static', filename='images/try.jpg') }}" alt="圖片 1" class='imgsize'>
+            客廳
+        </label><br>
+        
+        <label for="image2">
+            <input type="radio" id="image2" name="image_choice" value="Bathroom">
+            <img src="{{ url_for('crud.static', filename='images/try.jpg') }}" alt="圖片 2" class='imgsize'>
+            浴室
+        </label><br>
+        
+        <label for="image3">
+            <input type="radio" id="image3" name="image_choice" value="Kitchen">
+            <img src="{{ url_for('crud.static', filename='images/try.jpg') }}" alt="圖片 3" class='imgsize'>
+            廚房
+        </label><br>
+        
+        <label for="image4">
+            <input type="radio" id="image4" name="image_choice" value="Bedroom">
+            <img src="{{ url_for('crud.static', filename='images/try.jpg') }}" alt="圖片 4" class='imgsize'>
+            臥室
+        </label><br><br>
+    </div>
+    <div class='upload-button'>
+        <label for="image">上傳圖片：</label>
+        <input type="file" id="image" name="image">
+        <input type="submit" value="上傳並分析">
+    </div>
+</form>
+<a href="{{ url_for('crud.results', username=current_user.username) }}" class="weeeeee">磚頭～磚頭～真好玩～有趣喔！！！</a>
+{% endblock %}

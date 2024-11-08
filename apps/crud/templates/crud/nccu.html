@@ -1,0 +1,34 @@
+{% extends "crud/base.html" %}
+{% block content%}
+ <section id="mainsection">
+        <div class='image-container'>
+            <div class='background-image'></div>
+            <div class='text-overlay'>
+                <h2>現在開始讓AI評估安全!!!</h2>
+                <a href="{{ url_for('crud.example') }}">
+                    <p>註冊/登入並上傳生活環境圖</p>
+                </a>
+            </div>
+        </div>
+        <div class='content-container'>
+            <div class='left-side'>
+                <button class="left-textbox" onclick="clickleft('老年睡眠問題')">老年睡眠問題</button>
+                <button class="left-textbox" onclick="clickleft('糖尿病相關問題')">糖尿病相關問題</button>
+                <button class="left-textbox" onclick="clickleft('認知障礙相關問題')">認知障礙相關問題</button>
+                <button class="left-textbox" onclick="clickleft('精神健康相關問題')">精神健康相關問題</button>
+            </div>
+            <div class='middle'>
+                <div class='midup'>
+                    <h2>快速了解我們</h2>
+                </div>
+                <div class='middown'>
+                    <button class='mid-textbox'>AI精準醫療是什麼？</button>
+                    <button class='mid-textbox'>生活環境AI圖像辨識範例</button>
+                </div>
+            </div>
+            <div class='right-side' id="right-side-content">
+                <div class='right-image'>
+            </div>
+        </div>
+    </section>
+    {% endblock %}

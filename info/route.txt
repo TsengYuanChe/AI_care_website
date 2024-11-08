@@ -1,0 +1,36 @@
+# apps/routes.py
+from flask import render_template, redirect, url_for, request, flash
+from your_application import app, db
+from your_application.models import RawArticle, Category, FilteredArticle
+
+@app.route('/admin/raw_articles')
+def admin_raw_articles():
+    raw_articles = RawArticle.query.all()
+    return render_template('admin_raw_articles.html', raw_articles=raw_articles)
+
+@app.route('/admin/categorize/<int:article_id>', methods=['GET', 'POST'])
+def categorize_article(article_id):
+    article = RawArticle.query.get_or_404(article_id)
+    categories = Category.query.all()
+    
+    if request.method == 'POST':
+        category_id = request.form.get('category')
+        category = Category.query.get(category_id)
+        
+        if category:
+            # 將文章移到 FilteredArticle 資料表
+            filtered_article = FilteredArticle(
+                title=article.title,
+                content=article.content,
+                url=article.url,
+                category_id=category.id
+            )
+            db.session.add(filtered_article)
+            db.session.delete(article)
+            db.session.commit()
+            flash('文章已成功分類', 'success')
+            return redirect(url_for('admin_raw_articles'))
+        else:
+            flash('無效的分類', 'danger')
+    
+    return render_template('categorize_article.html', article=article, categories=categories)

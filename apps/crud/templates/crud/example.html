@@ -1,0 +1,28 @@
+{% extends "crud/base.html" %}
+{% block content%}
+<style>
+.image-container {
+    display: flex;
+    flex-wrap: wrap; /* 允許換行 */
+    justify-content: center; /* 水平置中 */
+}
+.gotoupload {
+    display: flex; /* 使用 flexbox 進行佈局 */
+    justify-content: center; /* 水平置中 */
+    align-items: center; /* 垂直置中（可選） */
+}
+</style>
+<div>
+    <h2>立即開始AI照護</h2>
+</div>
+<div class='image-container'>
+    <img src="{{ url_for('crud.static', filename='images/frog.jpeg') }}" alt="圖片 1">
+    <img src="{{ url_for('crud.static', filename='images/frog.jpeg') }}" alt="圖片 2">
+    <img src="{{ url_for('crud.static', filename='images/frog.jpeg') }}" alt="圖片 3">
+    <img src="{{ url_for('crud.static', filename='images/frog.jpeg') }}" alt="圖片 4">
+</div>
+<div class="gotoupload">
+    <a href="{{ url_for('crud.upload_image')}}">快滾去上傳</a>
+</div>
+
+{% endblock %}

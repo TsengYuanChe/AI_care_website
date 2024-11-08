@@ -1,0 +1,250 @@
+{% extends "crud/base.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <style>
+        /* 整體結構 */
+        .search-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 上方搜尋欄 */
+        .search-header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .search-bar {
+            width: 300px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .search-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .search-button:hover {
+            background-color: #218838;
+        }
+
+        /* 左側分類按鈕 */
+        .category-buttons {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-right: 20px;
+        }
+
+        .category-btn {
+            width: 150px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.3s;
+        }
+
+        .category-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .category-btn.active {
+            background-color: #0056b3;
+        }
+
+        /* 中間熱門文章 */
+        .popular-articles {
+            display: flex;
+            width: 60%;
+            padding: 10px;
+            background-color: #D5DCC5; /* 兩邊欄位的背景顏色 */
+            border-radius: 10px; /* 圓角 */
+            flex-direction: column;
+            position: relative;
+            height: 100%;
+            gap: 20px;
+        }
+
+        .article-card {
+            margin-bottom: 20px;
+        }
+
+        .article-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .article-meta {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .article-summary {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        /* 分頁控制 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .page-item {
+            margin: 0 5px;
+        }
+
+        .page-link {
+            padding: 8px 12px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            color: #007bff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .page-link.active, .page-link:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .content-container {
+                flex-direction: column;
+            }
+
+            .category-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .category-btn {
+                width: 45%;
+                margin: 5px;
+            }
+
+            .search-bar {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="search-page">
+        <!-- 上方區塊 -->
+        <div class="search-header">
+            <h1>文章搜尋</h1>
+            <form method="GET" action="{{ url_for('crud.search') }}" class="d-flex justify-content-center">
+                <input type="text" name="query" placeholder="搜尋文章..." class="search-bar me-2" value="{{ request.args.get('query', '') }}" required>
+                <button type="submit" class="search-button">搜尋</button>
+            </form>
+        </div>
+
+        <!-- 下方區塊 -->
+        <div class="content-container">
+            <!-- 左側分類按鈕 -->
+            <div class="left-side">
+                <a href="{{ url_for('crud.articles') }}" class="left-textbox {% if not selected_category %}active{% endif %}">所有文章</a>
+                {% for category in categories %}
+                    <a href="{{ url_for('crud.articles', category=category.name) }}" class="left-textbox {% if selected_category == category.name %}active{% endif %}">{{ category.name }}</a>
+                {% endfor %}
+            </div>
+
+            <!-- 中間熱門文章 -->
+            <div class="popular-articles">
+                <h2>熱門文章</h2>
+                {% if articles.items %}
+                    {% for article in articles.items %}
+                        <div class="card article-card">
+                            <div class="card-body">
+                                <h5 class="card-title article-title">{{ article.title }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted article-meta">
+                                    分類：{{ article.category.name }} | 瀏覽次數：{{ article.view_count }}
+                                </h6>
+                                <p class="card-text article-summary">
+                                    {{ article.summary }}
+                                </p>
+                                <a href="{{ url_for('view_article', article_id=article.id) }}" class="card-link">閱讀更多</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <!-- 分頁 -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if articles.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('crud.articles', page=articles.prev_num, category=selected_category) }}" aria-label="上一頁">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                            {% endif %}
+
+                            {% for page_num in articles.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                                {% if page_num %}
+                                    {% if page_num == articles.page %}
+                                        <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="{{ url_for('articles', page=page_num, category=selected_category) }}">{{ page_num }}</a></li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if articles.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('crud.articles', page=articles.next_num, category=selected_category) }}" aria-label="下一頁">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% else %}
+                    <p>暫無文章顯示。</p>
+                {% endif %}
+            </div>
+
+            <div class="right-side">
+                <div class='right-image'>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}
