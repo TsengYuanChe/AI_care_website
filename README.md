@@ -39,7 +39,8 @@
 
 最後在這個文章的頁面，左側分類按鈕會根據*categories*表格中的項目自動生成。顯示的文章會是*filtered_articles*表格中的文章。
 
-
+## Home button
+點擊房子圖示，可以回到首頁[nccu.html](apps/crud/templates/crud/nccu.html)。
 
 
 
