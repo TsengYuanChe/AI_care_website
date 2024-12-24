@@ -23,5 +23,5 @@
 ## 立即開始AI照護 和 註冊/登入並上傳生活照
 這兩個按鈕會導到同一個頁面[example.html](apps/crud/templates/crud/example.html)
 ![Example page](web_pic/example.png)
-這裡將會放不同場景的範例下方放置連結(前往上傳！)跳轉到下一個頁面
+這裡將會放不同場景的範例下方放置連結(前往上傳！)跳轉到下一個頁面，這個範例圖會再分析完整後製作
 ![Upload page](web_pic/upload.png)
