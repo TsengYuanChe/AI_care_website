@@ -16,4 +16,4 @@
 登入後會記錄使用者的身份和名稱，方便後續資料提供。
 
 ## 關於我們
-點擊關於我們後會輸出[us.txt](apps/auth/static/text/us.txt)中的文字內容。
+點擊關於我們後會輸出[us.txt](apps/crud/static/text/us.txt)中的文字內容。
