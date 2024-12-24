@@ -25,3 +25,7 @@
 ![Example page](web_pic/example.png)
 這裡將會放不同場景的範例下方放置連結(前往上傳！)跳轉到下一個頁面，這個範例圖會再分析完整後製作
 ![Upload page](web_pic/upload.png)
+這個上傳頁面的配置可以修改[upload.html](apps/crud/templates/crud/upload.html)。上傳時使用者必須上傳指定格式(.jpg,.png,.jpeg)，並選擇對應的場景，上傳後會記錄使用者上傳的圖片、分析後的圖片、給出的建議、選擇的場景，並輸出結果
+![Result page](web_pic/result.png)
+這個分析的model還需要再被訓練，目前只是用簡單的OpenCV分析，但這個分析模型可以被訓練後重新導入這個網站。使用者每上傳一次圖片，系統會根據當下登入的名稱自動建立一個資料夾在[uploads](uploads)底下，儲存上傳的照片和分析後的照片。另外，每上傳一次照片，數據庫[local.sqlite](local.sqlite)中的*analysis_result*表格也會新增一筆資料，包含 使用者名稱、圖片路徑、分析後圖片路徑、建議、user_id、location(選擇的場景) 
+
