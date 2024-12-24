@@ -21,3 +21,6 @@
 當然也可以更改[us.html](apps/crud/templates/crud/us.html)來編輯這個頁面的配置。
 
 ## 立即開始AI照護 和 註冊/登入並上傳生活照
+這兩個按鈕會導到同一個頁面[example.html](apps/crud/templates/crud/example.html)
+![Example page](web_pic/example.png)
+這裡將會放不同場景的範例下方放置連結跳轉到下一個頁面
