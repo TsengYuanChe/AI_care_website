@@ -16,4 +16,5 @@
 登入後會記錄使用者的身份和名稱，方便後續資料提供。
 
 ## 關於我們
-點擊關於我們後會輸出[us.txt](apps/crud/static/text/us.txt)中的文字內容。
+點擊關於我們後會輸出[us.txt](apps/crud/static/text/us.txt)中的文字內容。將確認好的文字內容放到文字檔後可以直接輸出。
+當然也可以更改[us.html](apps/crud/templates/crud/us.html)來編輯這個頁面的配置。
