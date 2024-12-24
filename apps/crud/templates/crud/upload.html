@@ -42,25 +42,25 @@
     <div class='image-container'>
         <label for="image1">
             <input type="radio" id="image1" name="image_choice" value="livingroom">
-            <img src="{{ url_for('crud.static', filename='images/try.jpg') }}" alt="圖片 1" class='imgsize'>
+            <img src="{{ url_for('crud.static', filename='images/livingroom.jpg') }}" alt="圖片 1" class='imgsize'>
             客廳
         </label><br>
         
         <label for="image2">
             <input type="radio" id="image2" name="image_choice" value="Bathroom">
-            <img src="{{ url_for('crud.static', filename='images/try.jpg') }}" alt="圖片 2" class='imgsize'>
+            <img src="{{ url_for('crud.static', filename='images/bathroom.jpg') }}" alt="圖片 2" class='imgsize'>
             浴室
         </label><br>
         
         <label for="image3">
             <input type="radio" id="image3" name="image_choice" value="Kitchen">
-            <img src="{{ url_for('crud.static', filename='images/try.jpg') }}" alt="圖片 3" class='imgsize'>
+            <img src="{{ url_for('crud.static', filename='images/kitchen.jpg') }}" alt="圖片 3" class='imgsize'>
             廚房
         </label><br>
         
         <label for="image4">
             <input type="radio" id="image4" name="image_choice" value="Bedroom">
-            <img src="{{ url_for('crud.static', filename='images/try.jpg') }}" alt="圖片 4" class='imgsize'>
+            <img src="{{ url_for('crud.static', filename='images/bedroom.jpg') }}" alt="圖片 4" class='imgsize'>
             臥室
         </label><br><br>
     </div>
@@ -70,5 +70,5 @@
         <input type="submit" value="上傳並分析">
     </div>
 </form>
-<a href="{{ url_for('crud.results', username=current_user.username) }}" class="weeeeee">磚頭～磚頭～真好玩～有趣喔！！！</a>
+<a href="{{ url_for('crud.results', username=current_user.username) }}" class="weeeeee">「檢視上傳結果」</a>
 {% endblock %}
