@@ -42,3 +42,18 @@ class LoginForm(FlaskForm):
 class UploadForm(FlaskForm):
     image = FileField('上傳圖片', validators=[DataRequired()])
     submit = SubmitField('上傳並分析')
+    
+class CategoryForm(FlaskForm):
+    category = SelectField(
+        '選擇分類',
+        coerce=int,
+        choices=[],  # 稍後動態填充
+        validators=[]  # 不強制要求選擇
+    )
+    new_category = StringField(
+        '新增分類',
+        validators=[
+            Length(max=50, message="分類名稱不能超過 50 個字符")
+        ]
+    )
+    submit = SubmitField('儲存分類')

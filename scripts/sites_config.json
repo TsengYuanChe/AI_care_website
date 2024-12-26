@@ -1,18 +1,10 @@
 {
-    "site1": {
-        "base_url": "https://site1.com/articles",
-        "article_selector": "div.article",
-        "title_selector": "h2.title",
-        "content_selector": "p.content",
-        "link_selector": "a.link",
-        "url_prefix": "https://site1.com"
-    },
-    "site2": {
-        "base_url": "https://site2.com/posts",
-        "article_selector": "article.post",
-        "title_selector": "h1.post-title",
-        "content_selector": "div.post-body",
-        "link_selector": "a.read-more",
-        "url_prefix": "https://site2.com"
+    "health99": {
+        "base_url": "https://health99.hpa.gov.tw/article",
+        "article_selector": "div.news_list",
+        "title_selector": "div.text_main h4",
+        "content_selector": "div.article_text",  
+        "link_selector": "a",
+        "url_prefix": "https://health99.hpa.gov.tw"
     }
 }

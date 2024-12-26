@@ -7,9 +7,15 @@ import os
 import cv2
 from werkzeug.utils import secure_filename
 from flask_login import current_user
-from apps.crud.models import analyze_image, AnalysisResult, Category, FilteredArticle, RawArticle
-from apps.auth.forms import UploadForm
-
+from apps.crud.models import analyze_image, AnalysisResult, Category, FilteredArticle, RawArticle, ImageTag
+from apps.auth.forms import UploadForm, CategoryForm
+from PIL import Image
+import numpy as np
+import torch
+import torchvision
+import uuid
+from pathlib import Path
+from sqlalchemy.exc import SQLAlchemyError
 
 crud = Blueprint(
     "crud",
@@ -104,63 +110,57 @@ def upload_image():
     form = UploadForm()
     if form.validate_on_submit():
         file = form.image.data
-        if request.method == 'POST':
-            # 檢查是否有文件被選擇
-            if 'image' not in request.files:
-                flash('未選擇文件')
-                return redirect(request.url)
+        if file and allowed_file(file.filename):
+            username = current_user.username
+            user_folder = create_user_directory(username)
 
-            file = request.files['image']
+            # 保存原始圖片
+            filename = secure_filename(file.filename)
+            original_path = os.path.join(user_folder, filename)
+            file.save(original_path)
 
-            if file.filename == '':
-                flash('未選擇文件')
-                return redirect(request.url)
+            # 執行檢測
+            tags, marked_filename = exec_detect(
+                target_image_path=original_path,
+                model_path=MODEL_PATH,
+                labels=LABELS
+            )
 
-            if file and allowed_file(file.filename):
-                # 獲取使用者選擇的圖片選項
-                image_choice = request.form.get('image_choice')
-                if not image_choice:
-                    flash('請選擇一個圖片選項')
-                    return redirect(request.url)
-                # 獲取當前使用者名稱，並建立專屬資料夾
-                username = current_user.username
-                user_folder = create_user_directory(username)
+            # 調試輸出
+            print("檢測到的標籤：", tags)
 
-                # 儲存原始圖片
-                filename = secure_filename(file.filename)
-                original_path = os.path.join(user_folder, filename)
-                file.save(original_path)
+            # 處理位置參數
+            location = request.form.get('image_choice', 'default_value')
+            print("接收到的位置參數：", location)
 
-                # 使用 OpenCV 分析圖片
-                img = cv2.imread(original_path)
-                marked_img, analysis_text = analyze_image(img)
-
-                # 儲存標記後的圖片
-                marked_filename = f"marked_{filename}"
-                marked_path = os.path.join(user_folder, marked_filename)
-                cv2.imwrite(marked_path, marked_img)
-
-                # 儲存改善建議到文本文件
-                suggestion_file = os.path.join(user_folder, 'suggestions.txt')
-                with open(suggestion_file, 'w') as f:
-                    f.write(analysis_text)
-
+            try:
+                # 保存分析結果
                 result = AnalysisResult(
                     user_id=current_user.id,
                     username=current_user.username,
                     original_image_path=f'uploads/{username}/{filename}',
                     marked_image_path=f'uploads/{username}/{marked_filename}',
-                    suggestions=analysis_text,
-                    location=image_choice,
+                    suggestions=", ".join(tags) if tags else "無標籤",
+                    location=location,
                 )
                 db.session.add(result)
                 db.session.commit()
-                
-                return render_template('crud/uploadresult.html', 
-                                    original_image=f'uploads/{username}/{filename}', 
-                                    marked_image=f'uploads/{username}/{marked_filename}', 
-                                    suggestions=analysis_text,
-                                    location=image_choice,)
+                flash('圖片上傳成功', 'success')
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                flash('數據庫錯誤', 'danger')
+                print(str(e))
+
+            return render_template(
+                'crud/uploadresult.html',
+                original_image=f'uploads/{username}/{filename}',
+                marked_image=f'uploads/{username}/{marked_filename}',
+                suggestions=tags,
+                location=location
+            )
+        else:
+            flash('請選擇有效的圖片文件', 'danger')
+
     return render_template('crud/upload.html', form=form)
 
 @crud.route("/result/<username>")
@@ -228,13 +228,29 @@ def admin_raw_articles():
 def categorize_article(article_id):
     article = RawArticle.query.get_or_404(article_id)
     categories = Category.query.all()
-    
-    if request.method == 'POST':
-        category_id = request.form.get('category')
-        category = Category.query.get(category_id)
-        
-        if category:
-            # 將文章移到 FilteredArticle 資料表
+
+    form = CategoryForm()
+    form.category.choices = [(0, '選擇分類')] + [(c.id, c.name) for c in categories]
+
+    if form.validate_on_submit():
+        new_category_name = form.new_category.data.strip()
+        selected_category_id = form.category.data
+
+        if new_category_name:  # 使用者新增分類
+            existing_category = Category.query.filter_by(name=new_category_name).first()
+            if not existing_category:
+                new_category = Category(name=new_category_name)
+                db.session.add(new_category)
+                db.session.commit()
+                flash(f'分類 "{new_category_name}" 新增成功', 'success')
+                # 將文章分類到新增的分類中
+                selected_category_id = new_category.id
+            else:
+                flash(f'分類 "{new_category_name}" 已存在', 'warning')
+                selected_category_id = existing_category.id
+
+        if selected_category_id and selected_category_id != 0:  # 檢查是否有選擇有效分類
+            category = Category.query.get(selected_category_id)
             filtered_article = FilteredArticle(
                 title=article.title,
                 content=article.content,
@@ -245,13 +261,15 @@ def categorize_article(article_id):
             db.session.delete(article)
             db.session.commit()
             flash('文章已成功分類', 'success')
-            return redirect(url_for('crud/admin_raw_articles'))
+            return redirect(url_for('crud.admin_raw_articles'))
         else:
-            flash('無效的分類', 'danger')
-    
-    return render_template('crud/categorize_article.html', article=article, categories=categories)
+            flash('請選擇有效分類或新增分類', 'danger')
 
-
+    return render_template(
+        'crud/categorize_article.html',
+        article=article,
+        form=form
+    )
 
 @crud.route('/search')
 def search():
@@ -273,3 +291,54 @@ def search():
     selected_category = None  # 搜尋結果不特定於某個分類
 
     return render_template('crud/articles.html', articles=articles, categories=categories, selected_category=selected_category)
+
+UPLOAD_FOLDER = "apps/crud/static/uploads"
+MODEL_PATH = Path('apps/crud/model.pt')  # 請確認模型路徑
+LABELS = [
+    "unlabeled", "person", "bicycle", "car", "motorcycle", "airplane", 
+    "bus", "train", "truck", "boat",  # 簡化標籤，完整標籤請根據需求替換
+]
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# 執行檢測
+def exec_detect(target_image_path, model_path, labels):
+    # 加載圖片
+    image = Image.open(target_image_path).convert('RGB')
+    image_tensor = torchvision.transforms.functional.to_tensor(image)
+
+    # 加載模型
+    model = torch.load(model_path)
+    model = model.eval()
+
+    # 執行檢測
+    output = model([image_tensor])[0]
+
+    tags = []
+    result_image = np.array(image.copy())
+    for box, label, score in zip(output["boxes"], output["labels"], output["scores"]):
+        if score > 0.5 and label < len(labels):  # 添加索引檢查
+            color = [np.random.randint(0, 255) for _ in range(3)]
+            c1 = (int(box[0]), int(box[1]))
+            c2 = (int(box[2]), int(box[3]))
+            cv2.rectangle(result_image, c1, c2, color, 2)
+            cv2.putText(result_image, labels[label], c1, cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            tags.append(labels[label])
+        else:
+            print(f"忽略無效標籤: {label}, 範圍超出 labels 長度")
+
+    # 保存標記後的圖片
+    detected_image_file_name = f"marked_{uuid.uuid4().hex}.jpg"
+    detected_image_file_path = os.path.join(os.path.dirname(target_image_path), detected_image_file_name)
+    cv2.imwrite(detected_image_file_path, cv2.cvtColor(result_image, cv2.COLOR_RGB2BGR))
+
+    return tags, detected_image_file_name
+
+# 建立用戶目錄
+def create_user_directory(username):
+    user_folder = os.path.join(UPLOAD_FOLDER, username)
+    os.makedirs(user_folder, exist_ok=True)
+    return user_folder

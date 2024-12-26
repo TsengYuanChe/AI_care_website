@@ -1,69 +1,89 @@
 {% extends "crud/base.html" %}
-{% block content%}
+{% block content %}
 <style>
     .original-image img,
     .marked-image img {
-        width: 500px; /* 固定寬度 */
-        height: auto; /* 固定高度 */
-        object-fit: cover; /* 確保圖片不失真，保持比例，填滿 */
-        border-radius: 5px; /* 可選：增加圓角 */
+        width: 500px;
+        height: auto;
+        object-fit: cover;
+        border-radius: 5px;
     }
     
     .results-container {
         display: flex;
-        flex-wrap: wrap; /* 允許換行，當圖片太多時 */
-        justify-content: space-between; /* 在容器內部均勻分配空間 */
+        flex-wrap: wrap;
+        justify-content: space-between;
     }
     
     .result-item {
         display: flex;
-        flex-direction: row; /* 水平排列 */
-        align-items: flex-start; /* 上對齊 */
-        margin-bottom: 20px; /* 每個項目的底部間距 */
-        width: 50%; /* 調整寬度 */
+        flex-direction: row;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        width: 100%; /* 調整寬度，允許內容換行 */
     }
     
     .original-image, .marked-image {
-        flex: 1; /* 等比縮放 */
-        padding: 10px; /* 內邊距 */
+        flex: 1;
+        padding: 10px;
     }
     
     .result-details {
-        flex-grow: 1; /* 允許欄位增長以填充空間 */
-        flex-shrink: 0; /* 防止欄位縮小 */
-        padding: 10px; /* 內邊距 */
+        flex-grow: 1;
+        padding: 10px;
         display: flex;
-        flex-direction: column; /* 垂直排列內容 */
-        min-width: 200px; /* 設置最小寬度 */
-        max-width: 300px; /* 設置最大寬度 */
-        overflow: hidden; /* 隱藏溢出內容 */
-        text-overflow: ellipsis; /* 使用省略號表示溢出內容 */
-        white-space: nowrap; /* 禁止換行 */
+        flex-direction: column;
+        min-width: 200px;
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
     
     .suggestions {
-        flex-grow: 1; /* 允許該欄位增長以填充空間 */
-        padding: 10px; /* 內邊距 */
-        min-width: 200px; /* 設置最小寬度 */
-        max-width: 300px; /* 設置最大寬度 */
-        white-space: normal; /* 允許換行 */
-        overflow: visible; /* 確保顯示所有內容 */
-        word-wrap: break-word; /* 遇到單詞超出時換行 */
-        text-align: left; /* 將文本對齊設置為左對齊 */
+        flex-grow: 1;
+        padding: 10px;
+        min-width: 200px;
+        max-width: 300px;
+        word-wrap: break-word;
+        text-align: left;
+    }
+
+    .suggestions ul {
+        list-style-type: disc; /* 使用圓點作為列表項符號 */
+        margin: 0;
+        padding-left: 20px; /* 列表左邊距 */
+    }
+
+    .suggestions ul li {
+        margin-bottom: 5px; /* 列表項之間的間距 */
     }
 </style>
+
 <div>
     <h2>分析結果</h2>
     <div class="result-item">
+        <!-- 原始圖片 -->
         <div class="original-image">
             <img src="{{ url_for('crud.static', filename=original_image) }}" alt="原始圖片">
         </div>
+
+        <!-- 標記後圖片 -->
         <div class="marked-image">
             <img src="{{ url_for('crud.static', filename=marked_image) }}" alt="標記後的圖片">
         </div>
+
+        <!-- 詳細信息 -->
         <div class="result-details">
-            <p>位置: {{ location }}</p> <!-- 假設 location 是用戶上傳時的選項 -->
-            <p class='suggestions'>建議：{{ suggestions }}</p>
+            <p>位置: {{ location }}</p>
+            <div class='suggestions'>
+                <h4>建議：</h4>
+                <ul>
+                    {% for tag in suggestions %}
+                        <li>{{ tag }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     </div>
 </div>

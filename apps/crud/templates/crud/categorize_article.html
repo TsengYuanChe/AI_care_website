@@ -7,17 +7,17 @@
             <h5 class="card-title">{{ article.title }}</h5>
             <p class="card-text">{{ article.content }}</p>
             <form method="POST">
+                {{ form.hidden_tag() }}
                 <div class="mb-3">
                     <label for="category" class="form-label">選擇分類</label>
-                    <select class="form-select" id="category" name="category" required>
-                        <option value="" selected disabled>選擇分類</option>
-                        {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                        {% endfor %}
-                    </select>
+                    {{ form.category(class="form-select") }}
+                </div>
+                <div class="mb-3">
+                    <label for="new_category" class="form-label">新增分類</label>
+                    {{ form.new_category(class="form-control", placeholder="輸入新分類名稱") }}
                 </div>
                 <button type="submit" class="btn btn-success">儲存分類</button>
-                <a href="{{ url_for('crud.admin_raw_articles') }}" class="btn btn-secondary">取消</a>
+                <button href="{{ url_for('crud.admin_raw_articles') }}" class="btn btn-secondary">取消</button>
             </form>
         </div>
     </div>

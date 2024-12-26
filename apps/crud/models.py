@@ -69,10 +69,21 @@ class AnalysisResult(db.Model):
     location = db.Column(db.String(255), nullable=False, default='default_value')
 
     user = db.relationship('User', backref=db.backref('results', lazy=True))
+    
+    # 新增標籤關聯
+    tags = db.relationship('ImageTag', backref='analysis_result', lazy=True)
 
     def __repr__(self):
         return f'<AnalysisResult {self.id} by User {self.user_id}>'
-    
+
+class ImageTag(db.Model):
+    __tablename__ = 'image_tag'
+    id = db.Column(db.Integer, primary_key=True)
+    tag_name = db.Column(db.String(255), nullable=False)
+    analysis_result_id = db.Column(db.Integer, db.ForeignKey('analysis_result.id', name='fk_analysis_result_id'), nullable=False)
+
+    def __repr__(self):
+        return f'<ImageTag {self.tag_name} for Result {self.analysis_result_id}>'
 
 class RawArticle(db.Model):
     __tablename__ = 'raw_articles'

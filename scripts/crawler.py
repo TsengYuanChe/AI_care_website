@@ -25,6 +25,27 @@ def load_sites_config(config_path='sites_config.json'):
     with open(config_full_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+def scrape_article_details(article_url):
+    """爬取文章詳細內容"""
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+                      ' Chrome/58.0.3029.110 Safari/537.3'
+    }
+    try:
+        response = requests.get(article_url, headers=headers, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to retrieve article details: {e}")
+        return None
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    content_div = soup.select_one("div.article_text")  # 調整這裡以匹配詳細內容的結構
+    if content_div:
+        return content_div.get_text(strip=True)
+    else:
+        print("No content found for article.")
+        return "無法爬取內容"
+
 def scrape_site(site_name, config):
     """根據配置爬取單個網站的文章"""
     url = config['base_url']
@@ -52,15 +73,13 @@ def scrape_site(site_name, config):
 
     for article in articles:
         title_tag = article.select_one(config['title_selector'])
-        content_tag = article.select_one(config['content_selector'])
         link_tag = article.select_one(config['link_selector'])
 
-        if not title_tag or not content_tag or not link_tag:
-            print(f"[{site_name}] Missing title, content, or link in one of the articles.")
+        if not title_tag or not link_tag:
+            print(f"[{site_name}] Missing title or link in one of the articles.")
             continue
 
         title = title_tag.get_text(strip=True)
-        content = content_tag.get_text(strip=True)
         article_url = link_tag.get('href')
 
         if not article_url.startswith('http'):
@@ -69,6 +88,7 @@ def scrape_site(site_name, config):
 
         # 檢查文章是否已存在
         if not RawArticle.query.filter_by(url=article_url).first():
+            content = scrape_article_details(article_url)
             new_article = RawArticle(title=title, content=content, url=article_url)
             db.session.add(new_article)
             print(f"[{site_name}] Added new article: {title}")
