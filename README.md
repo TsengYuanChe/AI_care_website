@@ -34,10 +34,11 @@
 ## 衛教文章專區
 預計在這個頁面中會顯示不同主題的衛教文章，並且顯示點擊次數，配置可修改[articles.html](apps/crud/templates/crud/articles.html)。
 ![Articles page](web_pic/articles,png.png)
-現在做到的這個頁面是還沒有任何文章的狀態。
-可以利用爬蟲程式[crawler.py](scripts/crawler.py)，爬取特定網站的新聞資料，並將這些*raw_articles*存到數據庫[local.sqlite](local.sqlite)中的*raw_articles*表格。之後由管理者進入端口(/crud/admin/raw_articles)[admin_raw_article.html](apps/crud/templates/crud/admin_raw_article.html)來查看所又原始文章
+可以利用爬蟲程式[crawler.py](scripts/crawler.py)，爬取特定網站的新聞資料，並將這些*raw_articles*存到數據庫[local.sqlite](local.sqlite)中的*raw_articles*表格，預計可以將要爬取的網站資料放在[site_config.json](apps/script/sites_config.json)，定期執行爬蟲。之後由管理者進入端口(/crud/admin/raw_articles)[admin_raw_article.html](apps/crud/templates/crud/admin_raw_article.html)來查看所有原始文章
 ![Raw_Articles page](web_pic/raw_article.png)
-在管理者點擊這些原始文章後會跳轉到端口(/crud/admin/categorize/int:article_id)[categorize_article.html](apps/crud/templates/crud/categorize_article.html)來篩選並分類這些文章，分類的總類會存到數據庫[local.sqlite](local.sqlite)中的*categories*表格。篩選過後的文章會存到數據庫[local.sqlite](local.sqlite)中的*filtered_articles*表格。
+在管理者點擊這些原始文章後會跳轉到端口(/crud/admin/categorize/int:article_id)[categorize_article.html](apps/crud/templates/crud/categorize_article.html)來篩選並分類這些文章
+![Category page](web_pic/category.png)
+下來選單會顯示所有的分類，若沒有符合的可以直接新增。分類的總類會存到數據庫[local.sqlite](local.sqlite)中的*categories*表格。篩選過後的文章會存到數據庫[local.sqlite](local.sqlite)中的*filtered_articles*表格。
 
 最後在這個文章的頁面，左側分類按鈕會根據*categories*表格中的項目自動生成。顯示的文章會是*filtered_articles*表格中的文章。
 
